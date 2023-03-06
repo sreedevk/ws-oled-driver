@@ -2,6 +2,10 @@
 name = "ws-oled-driver"
 version = "0.0.2"
 edition = "2021"
+license = "MIT"
+description = "Raspberry Pi Waveshare OLED display hat driver"
+authors = ["Sreedev Kodichath <sreedevpadmakumar@gmail.com>"]
+repository = "https://github.com/sreedevk/ws-oled-driver"
 
 [dependencies]
 anyhow = "1.0.69"

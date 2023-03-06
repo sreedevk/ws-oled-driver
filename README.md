@@ -14,7 +14,7 @@ cargo add ws-oled-driver
 
 ```toml
 [dependencies]
-ws-oled-driver = "0.0.2"
+ws-oled-driver = "0.0.3"
 ```
 
 ### Cross Compiling for Raspberry Pi Zero

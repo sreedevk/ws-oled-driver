@@ -1,13 +1,13 @@
 use std::{thread::sleep, time::Duration};
+pub type Buffer = Vec<u8>;
 
 use anyhow::Result;
 use rppal::{
-    gpio::{Gpio,OutputPin},
+    gpio::{Gpio, OutputPin},
     spi::Spi,
 };
 
 const BUS_CLOCK_SPEED: u32 = 2_000_000;
-
 const RST_PIN: u8 = 25;
 const DC_PIN: u8 = 24;
 const CS_PIN: u8 = 8;
@@ -21,17 +21,17 @@ pub enum Protocol {
     I2C,
 }
 
-#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Display {
-    width: u8,
-    height: u8,
-    dc_pin: OutputPin,
-    cs_pin: OutputPin,
-    rst_pin: OutputPin,
-    bl_pin: OutputPin,
-    protocol: Protocol,
-    bus: Spi,
+    pub width: u8,
+    pub height: u8,
+    pub dc_pin: OutputPin,
+    pub cs_pin: OutputPin,
+    pub rst_pin: OutputPin,
+    pub bl_pin: OutputPin,
+    pub protocol: Protocol,
+    pub bus: Spi,
+    pub memory: Buffer,
 }
 
 impl Display {
@@ -77,7 +77,7 @@ impl Display {
         Ok(())
     }
 
-    pub fn show_image(&mut self, buffer: &[u8]) -> Result<()> {
+    pub fn render(&mut self) -> Result<()> {
         for page in 0..8 {
             self.write_command(&[0xB0 + page])?;
             self.write_command(&[0x02])?;
@@ -88,7 +88,9 @@ impl Display {
                 Protocol::SPI => {
                     self.dc_pin.set_high();
                     for index in 0..self.width {
-                        self.spi_write_byte(&[buffer[(index + (self.width * page)) as usize]])?;
+                        self.spi_write_byte(
+                            &[self.memory[(index + (self.width * page)) as usize]],
+                        )?;
                     }
                 }
             }
@@ -97,37 +99,32 @@ impl Display {
         Ok(())
     }
 
-    pub fn clear(&mut self) -> Result<()> {
-        self.show_image(&[0xFF; (WIDTH as usize * HEIGHT as usize) / 8usize])?;
-        Ok(())
-    }
-
     pub fn initialize(&mut self) -> Result<()> {
         self.reset()?;
-        self.write_command(&[0xAE])?; /* TURN OFF */
-        self.write_command(&[0x02])?; /* LOW COL ADDR */
-        self.write_command(&[0x10])?; /* HOW COL ADDR */
-        self.write_command(&[0x40])?; /* SET LINE ADDR */
-        self.write_command(&[0x81])?; /* CONTRAST CTLR REGISTER */
-        self.write_command(&[0xA0])?; // --Set SEG/Column Mapping
-        self.write_command(&[0xC0])?; // Set COM/Row Scan Direction
-        self.write_command(&[0xA6])?; // --set normal display
-        self.write_command(&[0xA8])?; // --set multiplex ratio(1 to 64)
-        self.write_command(&[0x3F])?; // --1/64 duty
-        self.write_command(&[0xD3])?; // -set display offset    Shift Mapping RAM Counter (0x00~0x3F)
-        self.write_command(&[0x00])?; // -not offset
-        self.write_command(&[0xd5])?; // --set display clock divide ratio/oscillator frequency
-        self.write_command(&[0x80])?; // --set divide ratio, Set Clock as 100 Frames/Sec
-        self.write_command(&[0xD9])?; // --set pre-charge period
-        self.write_command(&[0xF1])?; // Set Pre-Charge as 15 Clocks & Discharge as 1 Clock
-        self.write_command(&[0xDA])?; // --set com pins hardware configuration
-        self.write_command(&[0x12])?; //
-        self.write_command(&[0xDB])?; // --set vcomh
-        self.write_command(&[0x40])?; // Set VCOM Deselect Level
-        self.write_command(&[0x20])?; // -Set Page Addressing Mode (0x00/0x01/0x02)
-        self.write_command(&[0x02])?; //
-        self.write_command(&[0xA4])?; //  Disable Entire Display On (0xa4/0xa5)
-        self.write_command(&[0xA6])?; //  Disable Inverse Display On (0xa6/a7)
+        self.write_command(&[0xAE])?;
+        self.write_command(&[0x02])?;
+        self.write_command(&[0x10])?;
+        self.write_command(&[0x40])?;
+        self.write_command(&[0x81])?;
+        self.write_command(&[0xA0])?;
+        self.write_command(&[0xC0])?;
+        self.write_command(&[0xA6])?;
+        self.write_command(&[0xA8])?;
+        self.write_command(&[0x3F])?;
+        self.write_command(&[0xD3])?;
+        self.write_command(&[0x00])?;
+        self.write_command(&[0xd5])?;
+        self.write_command(&[0x80])?;
+        self.write_command(&[0xD9])?;
+        self.write_command(&[0xF1])?;
+        self.write_command(&[0xDA])?;
+        self.write_command(&[0x12])?;
+        self.write_command(&[0xDB])?;
+        self.write_command(&[0x40])?;
+        self.write_command(&[0x20])?;
+        self.write_command(&[0x02])?;
+        self.write_command(&[0xA4])?;
+        self.write_command(&[0xA6])?;
         sleep(Duration::from_millis(100));
         self.write_command(&[0xAF])?; // --turn on oled panel
         Ok(())
@@ -161,6 +158,7 @@ impl Display {
             cs_pin,
             bl_pin,
             bus,
+            memory: vec![0; WIDTH as usize * HEIGHT as usize],
         })
     }
 }

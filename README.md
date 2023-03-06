@@ -27,6 +27,8 @@ ws-oled-driver = "0.0.2"
 
 #### Display
 
+NOTE: THE `ws_oled_driver::gfx` library is a work in progress. Since there is direct access available to the `Display { memory: Vec<u8> }` field, which is the display buffer, you may directly modify the buffer to create visuals and use the `display.render()?` function to render it to the display.
+
 ```rust
 use ws_oled_driver::Device;  /* HAT Device */
 use ws_oled_driver::gfx;     /* Graphics */

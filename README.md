@@ -17,6 +17,12 @@ cargo add ws-oled-driver
 ws-oled-driver = "0.0.2"
 ```
 
+### Cross Compiling for Raspberry Pi Zero
+
+```bash
+  cargo build --target arm-unknown-linux-gnueabihf --release 
+```
+
 ### Examples
 
 #### Display
@@ -24,51 +30,52 @@ ws-oled-driver = "0.0.2"
 ```rust
 use ws_oled_driver::Device;  /* HAT Device */
 use ws_oled_driver::gfx;     /* Graphics */
-use ws_oled_driver::joystick;
-use std::thread::sleep;
-use std::time::Duration;
+use anyhow::Result;
 
-fn main() {
-   let mut device = Device::new();
-   device.initialize_components();
+fn main() -> Result<()> {
+   let mut device = Device::new()?;
+   device.initialize_components()?;
 
    /* FILL DISPLAY */
    gfx::fill(&mut device.display, 0xFF);
    device.display.render()?; 
+
+   Ok(())
 }
 ```
 
 #### Joystick
 
 ```rust
-use ws_oled_driver::Device;  /* HAT Device */
+use anyhow::Result;
 use ws_oled_driver::joystick;
+use ws_oled_driver::Device; /* HAT Device */
 
-fn main() {
-  let mut device = Device::new();
-  device.initialize_components();
+fn main() -> Result<()> {
+    let mut device = Device::new()?;
+    device.initialize_components()?;
 
-  loop {
-    if let Some(joystick_state) = device.joystick.read() {
-      match joystick_state {
-        joystick::State::Up => {
-          println!("You Pressed Up");
+    loop {
+        if let Some(joystick_state) = device.joystick.read() {
+            match joystick_state {
+                joystick::State::Up => {
+                    println!("You Pressed Up");
+                }
+                joystick::State::Down => {
+                    println!("You Pressed Down");
+                }
+                joystick::State::Left => {
+                    println!("You Pressed Left");
+                }
+                joystick::State::Right => {
+                    println!("You Pressed Right");
+                }
+                joystick::State::Click => {
+                    println!("You Clicked!");
+                }
+            }
         }
-        joystick::State::Down => {
-          println!("You Pressed Down");
-        }
-        joystick::State::Left => {
-          println!("You Pressed Left");
-        }
-        joystick::State::Right => {
-          println!("You Pressed Right");
-        }
-        joystick::State::Click => {
-          println!("You Clicked!");
-        }
-      } 
     }
-  }
 }
 
 ```
@@ -77,11 +84,12 @@ fn main() {
 
 ```rust
 use ws_oled_driver::Device;  /* HAT Device */
-use button::State;
+use ws_oled_driver::button::State;
+use anyhow::Result;
 
-fn main() {
-  let mut device = Device::new();
-  device.initialize_components();
+fn main() -> Result<()> {
+  let mut device = Device::new()?;
+  device.initialize_components()?;
 
   loop {
     if let Some(button_state) = device.button_controller.read() {
@@ -99,4 +107,5 @@ fn main() {
 
 ```
 
-
+### Roadmap
+1. Improve Graphics Library

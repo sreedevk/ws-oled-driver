@@ -31,9 +31,9 @@ impl ButtonController {
     }
 
     pub fn read(&self) -> Option<State> {
-        if self.pin1.read() == Level::High { return Some(State::Key1); }
-        if self.pin2.read() == Level::High { return Some(State::Key2); }
-        if self.pin3.read() == Level::High { return Some(State::Key3); }
+        if self.pin1.read() == Level::Low { return Some(State::Key1); }
+        if self.pin2.read() == Level::Low { return Some(State::Key2); }
+        if self.pin3.read() == Level::Low { return Some(State::Key3); }
 
         None
     }

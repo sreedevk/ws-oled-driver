@@ -15,6 +15,7 @@ const BL_PIN: u8 = 18;
 const WIDTH: u8 = 128;
 const HEIGHT: u8 = 64;
 
+/// Protocol used to access the device. Currently only supports SPI
 #[derive(Debug)]
 pub enum Protocol {
     SPI,
@@ -35,6 +36,8 @@ pub struct Display {
 }
 
 impl Display {
+    /// Write a command byte to the device. The byte should be of the type `&[u8]`. The DC pin is
+    /// set low to indicate that the byte being written is a command byte.
     pub fn write_command(&mut self, byte: &[u8]) -> Result<()> {
         match self.protocol {
             Protocol::SPI => {
@@ -45,6 +48,8 @@ impl Display {
         }
     }
 
+    /// Write a data byte to the device. The byte should be of the type `&[u8]`. The DC pin is set
+    /// high to indicate that the byte being written is a data byte
     pub fn write_data(&mut self, byte: &[u8]) -> Result<()> {
         match self.protocol {
             Protocol::SPI => {
@@ -55,17 +60,20 @@ impl Display {
         }
     }
 
+    /// Raw SPI write byte function. DO NOT USE. use `write_command` or `write_data` instead.
     pub fn spi_write_byte(&mut self, byte: &[u8]) -> Result<()> {
         self.bus.write(byte)?;
 
         Ok(())
     }
 
+    /// TODO: Add Support for I2C
     pub fn i2c_write_byte(&self, _byte: &[u8]) -> Result<()> {
         /* TODO: IMPLEMENT I2C */
         Ok(())
     }
 
+    /// Reset the display.
     pub fn reset(&mut self) -> Result<()> {
         self.rst_pin.set_high();
         sleep(Duration::from_millis(100));
@@ -77,6 +85,9 @@ impl Display {
         Ok(())
     }
 
+    /// The Graphics buffer is stored in the `Display { memory: Vec<u8> }` field. The
+    /// `ws_oled_driver::gfx` library functions work on the memory field. It writes the pixes onto the
+    /// memory field. The `render` function dumps the `memory` field onto the display.
     pub fn render(&mut self) -> Result<()> {
         for page in 0..8 {
             self.write_command(&[0xB0 + page])?;
@@ -99,6 +110,7 @@ impl Display {
         Ok(())
     }
 
+    /// Initializes the display device.
     pub fn initialize(&mut self) -> Result<()> {
         self.reset()?;
         self.write_command(&[0xAE])?;
@@ -130,6 +142,7 @@ impl Display {
         Ok(())
     }
 
+    /// Initializes SPI protocol for the device.
     pub fn new() -> Result<Self> {
         /* INITIALIZE GPIO */
         let gpio = Gpio::new()?;

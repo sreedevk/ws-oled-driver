@@ -1,11 +1,15 @@
 use crate::display::Display;
 use anyhow::Result;
+/// Point type is used to address a pixel on the display buffer. The Point type is a `(isize, isize)` which 
+/// can be used to address a pixel (x, y).
 type Point = (isize, isize);
 
+/// Fill the display buffer with a value which maybe either `0x00` or `0xFF`.
 pub fn fill(display: &mut Display, value: u8) {
     display.memory.iter_mut().for_each(|mem| *mem = value);
 }
 
+/// Draws a single point onto the display buffer.
 pub fn draw_point(display: &mut Display, point: Point) {
     let display_width = display.width as isize;
     let display_height = display.height as isize;
@@ -18,6 +22,7 @@ pub fn draw_point(display: &mut Display, point: Point) {
     display.memory[index as usize] = 0xFF;
 }
 
+/// Draws a line on the display buffer.
 pub fn draw_line(display: &mut Display, begin: Point, end: Point) {
     let display_width = display.width as isize;
     let display_height = display.height as isize;
@@ -30,7 +35,6 @@ pub fn draw_line(display: &mut Display, begin: Point, end: Point) {
                 return;
             }
 
-    // Determine the x and y directions of the line.
     let dx = if begin.0 > end.0 {
         begin.0 - end.0
     } else {
@@ -44,12 +48,10 @@ pub fn draw_line(display: &mut Display, begin: Point, end: Point) {
     let sx = if begin.0 < end.0 { 1 } else { -1 };
     let sy = if begin.1 < end.1 { 1 } else { -1 };
 
-    // Initialize the error variable and the current coordinates.
     let mut err = dx - dy;
     let mut x = begin.0;
     let mut y = begin.1;
 
-    // Draw the line.
     while x != end.0 || y != end.1 {
         let index = y * display_width + x;
         display.memory[index as usize] = 255;
@@ -69,6 +71,7 @@ pub fn draw_line(display: &mut Display, begin: Point, end: Point) {
     display.memory[index as usize] = 255;
 }
 
+/// Clears the display buffer. Fills it with 0x00.
 pub fn clear(display: &mut Display) -> Result<()> {
     fill(display, 0x00);
 

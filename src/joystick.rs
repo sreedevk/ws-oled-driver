@@ -15,6 +15,7 @@ pub struct Joystick {
     click_pin: InputPin,
 }
 
+#[derive(Debug)]
 pub enum State {
     Up,
     Down,

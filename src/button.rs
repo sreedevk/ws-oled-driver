@@ -7,6 +7,7 @@ const KEY1_PIN: u8 = 21;
 const KEY2_PIN: u8 = 20;
 const KEY3_PIN: u8 = 16;
 
+#[derive(Debug)]
 pub enum State {
     Key1,
     Key2,

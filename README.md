@@ -17,6 +17,8 @@ cargo add ws-oled-driver
 ws-oled-driver = "0.0.5"
 ```
 
+![IMG_1405](https://user-images.githubusercontent.com/36154121/223321262-3dc88e22-6e2e-4104-b286-be97ac77d74f.jpeg)
+
 ### Cross Compiling for Raspberry Pi Zero
 
 ```bash

@@ -14,7 +14,7 @@ cargo add ws-oled-driver
 
 ```toml
 [dependencies]
-ws-oled-driver = "0.0.4"
+ws-oled-driver = "0.0.5"
 ```
 
 ### Cross Compiling for Raspberry Pi Zero
@@ -40,6 +40,14 @@ fn main() -> Result<()> {
 
    /* FILL DISPLAY */
    gfx::fill(&mut device.display, 0xFF);
+   device.display.render()?; 
+
+   /* DRAW POINT at (x, y) == (10, 10) */
+   gfx::draw_point(&mut device.display, (10, 10), 0xFF);
+
+   /* DRAW LINE */
+
+   gfx::draw_line(&mut device.display, (0, 0), (127, 63));
    device.display.render()?; 
 
    Ok(())

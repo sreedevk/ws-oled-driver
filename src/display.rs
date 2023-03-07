@@ -7,12 +7,12 @@ use rppal::{
     spi::Spi,
 };
 
-const BUS_CLOCK_SPEED: u32 = 2_000_000;
+const BUS_CLOCK_SPEED: u32 = 8_000_000;
 const RST_PIN: u8 = 25;
 const DC_PIN: u8 = 24;
 const CS_PIN: u8 = 8;
 const BL_PIN: u8 = 18;
-const WIDTH: u8 = 128;
+const WIDTH: u8 = 132;
 const HEIGHT: u8 = 64;
 
 /// Protocol used to access the device. Currently only supports SPI
@@ -98,10 +98,9 @@ impl Display {
                 Protocol::I2C => todo!("implement i2c"),
                 Protocol::SPI => {
                     self.dc_pin.set_high();
-                    for index in 0..self.width {
-                        self.spi_write_byte(
-                            &[self.memory[(index + (self.width * page)) as usize]],
-                        )?;
+                    for index in 0..=(self.width as usize) {
+                        let byte = self.memory[index + self.width as usize * page as usize];
+                        self.spi_write_byte(&[byte])?;
                     }
                 }
             }
